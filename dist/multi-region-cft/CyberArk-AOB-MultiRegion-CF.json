@@ -420,6 +420,18 @@
                 "ToPort": "443",
                 "CidrIp": "0.0.0.0/0"
             }
+		},
+		"EgressAccessDNS": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "ElasticityLambdaSecurityGroup"
+                },
+                "IpProtocol": "udp",
+                "FromPort": "53",
+                "ToPort": "53",
+                "CidrIp": "0.0.0.0/0"
+            }
         },
 		"LambdaS3BucketRole": {
             "Type": "AWS::IAM::Role",

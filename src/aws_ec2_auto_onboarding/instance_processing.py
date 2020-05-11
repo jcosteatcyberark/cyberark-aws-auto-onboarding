@@ -86,12 +86,12 @@ def create_instance(instanceId, instanceDetails, storeParametersClass, logName, 
         instanceUsername = ADMINISTRATOR
         safeName = storeParametersClass.windowsSafeName
     else:
-        ppkKey = kp_processing.convert_pem_to_ppk(instanceAccountPassword)
-        if not ppkKey:
-            raise Exception("Error on key conversion")
+        #ppkKey = kp_processing.convert_pem_to_ppk(instanceAccountPassword)
+        #if not ppkKey:
+        #    raise Exception("Error on key conversion")
         # ppkKey contains \r\n on each row end, adding escape char '\'
-        trimmedPPKKey = str(ppkKey).replace("\n", "\\n")
-        instanceKey = trimmedPPKKey.replace("\r", "\\r")
+        #trimmedPPKKey = str(instanceAccountPassword).replace("\n", "\\n")
+        instanceKey = instanceAccountPassword#trimmedPPKKey.replace("\r", "\\r")
         AWSAccountName = 'AWS.{0}.Unix'.format(instanceId)
         platform = UNIX_PLATFORM
         safeName = storeParametersClass.unixSafeName

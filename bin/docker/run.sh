@@ -41,6 +41,6 @@ cd /tmp/cache/package
 zip -q -r9 /tmp/output/${ONBOARDING_LAMBDA_ZIP} .
 
 cd /tmp/src/aws_ec2_auto_onboarding
-zip -q -g /tmp/output/${ONBOARDING_LAMBDA_ZIP} aws_services.py AWSEc2AutoOnboarding.py instance_processing.py kp_processing.py pvwa_api_calls.py pvwa_integration.py puttygen
+zip -q -g /tmp/output/${ONBOARDING_LAMBDA_ZIP} aws_services.py AWSEc2AutoOnboarding.py instance_processing.py kp_processing.py pvwa_api_calls.py pvwa_integration.py
 
 log_done "${ONBOARDING_LAMBDA_ZIP} built!"

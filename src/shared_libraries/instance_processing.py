@@ -94,12 +94,7 @@ def create_instance(instance_id, instance_details, store_parameters_class, log_n
         safe_name = store_parameters_class.windows_safe_name
     else:
         logger.info('Linux\\Unix platform detected')
-        ppk_key = kp_processing.convert_pem_to_ppk(instance_account_password)
-        if not ppk_key:
-            raise Exception("Error on key conversion")
-        # ppk_key contains \r\n on each row end, adding escape char '\'
-        trimmed_ppk_key = str(ppk_key).replace("\n", "\\n")
-        instance_key = trimmed_ppk_key.replace("\r", "\\r")
+        instance_key = instance_account_password.replace('"', '').replace("\n", "\\n").replace("\r", "\\r")
         aws_account_name = f'AWS.{instance_id}.Unix'
         platform = UNIX_PLATFORM
         safe_name = store_parameters_class.unix_safe_name

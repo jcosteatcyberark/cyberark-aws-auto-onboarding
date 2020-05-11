@@ -140,16 +140,6 @@ class KpProcessingTest(unittest.TestCase):
         kp = kp_processing.save_key_pair(keyf)
         self.assertEqual(None, kp)
 
-    def test_convert_pem_to_ppk(self):
-        print('test_convert_pem_to_ppk')
-        with open('pemValueM.pem', 'r') as file:
-            keyf = file.read()
-        ppk_key = kp_processing.convert_pem_to_ppk(keyf)
-        self.assertIn('Private-MAC:', ppk_key)
-        with self.assertRaises(Exception) as context:
-            kp_processing.convert_pem_to_ppk('3')
-        self.assertEqual(Exception, type(context.exception))
-
     def test_decrypt_password(self):
         print('test_decrypt_password')
         command = kp_processing.decrypt_password(
@@ -382,7 +372,6 @@ def func_create_instance(ec2_class, ec2_object):
     mocky.return_value = ['1', '2']
     @patch('kp_processing.save_key_pair', return_value=True)
     @patch('instance_processing.get_instance_password_data', return_value='StrongPassword')
-    @patch('kp_processing.convert_pem_to_ppk', return_value='VeryValue')
     @patch('kp_processing.decrypt_password', mocky)
     @patch('aws_services.get_session_from_dynamo', return_value=['3', '4'])
     @patch('pvwa_integration.PvwaIntegration.logon_pvwa', return_value='asbhdsyadbasASDUASDUHB2312312')

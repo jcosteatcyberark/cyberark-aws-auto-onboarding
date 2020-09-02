@@ -100,21 +100,22 @@ def get_instance_data_from_dynamo_table(instance_id):
 def get_params_from_param_store():
     # Parameters that will be retrieved from parameter store
     logger.info('Getting parameters from parameter store')
-    UNIX_SAFE_NAME_PARAM = "AOB_Unix_Safe_Name"
-    WINDOWS_SAFE_NAME_PARAM = "AOB_Windows_Safe_Name"
-    VAULT_USER_PARAM = "AOB_Vault_User"
-    PVWA_IP_PARAM = "AOB_PVWA_IP"
-    AWS_KEYPAIR_SAFE = "AOB_KeyPair_Safe"
-    VAULT_PASSWORD_PARAM_ = "AOB_Vault_Pass"
-    PVWA_VERIFICATION_KEY = "AOB_PVWA_Verification_Key"
-    AOB_MODE = "AOB_mode"
-    AOB_DEBUG_LEVEL = "AOB_Debug_Level"
+    parameters = {
+        "Unix_Safe_Name": None,
+        "Unix_Platform_Name": None,
+        "Windows_Safe_Name": None,
+        "Windows_Platform_Name": None,
+        "Vault_User": None,
+        "PVWA_IP": None,
+        "KeyPair_Safe": None,
+        "Vault_Pass": None,
+        "AOB_PVWA_Verification_Key": None,
+        "AOB_mode": None,
+        "AOB_Debug_Level": None,
+    }
 
     lambda_client = boto3.client('lambda')
-    lambda_request_data = dict()
-    lambda_request_data["Parameters"] = [UNIX_SAFE_NAME_PARAM, WINDOWS_SAFE_NAME_PARAM, VAULT_USER_PARAM, PVWA_IP_PARAM,
-                                         AWS_KEYPAIR_SAFE, VAULT_PASSWORD_PARAM_, PVWA_VERIFICATION_KEY, AOB_MODE,
-                                         AOB_DEBUG_LEVEL]
+    lambda_request_data = { "Parameters": list(parameters) }
     try:
         response = lambda_client.invoke(FunctionName='TrustMechanism',
                                         InvocationType='RequestResponse',
@@ -126,30 +127,24 @@ def get_params_from_param_store():
     json_parsed_response = json.load(response['Payload'])
     # parsing the parameters, json_parsed_response is a list of dictionaries
     for ssm_store_item in json_parsed_response:
-        if ssm_store_item['Name'] == UNIX_SAFE_NAME_PARAM:
-            unix_safe_name = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == WINDOWS_SAFE_NAME_PARAM:
-            windows_safe_name = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == VAULT_USER_PARAM:
-            vault_username = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == PVWA_IP_PARAM:
-            pvwa_ip = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == AWS_KEYPAIR_SAFE:
-            key_pair_safe_name = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == VAULT_PASSWORD_PARAM_:
-            vault_password = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == PVWA_VERIFICATION_KEY:
-            pvwa_verification_key = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == AOB_DEBUG_LEVEL:
-            debug_level = ssm_store_item['Value']
-        elif ssm_store_item['Name'] == AOB_MODE:
-            aob_mode = ssm_store_item['Value']
-            if aob_mode == 'POC':
-                pvwa_verification_key = ''
-        else:
-            continue
-    store_parameters_class = StoreParameters(unix_safe_name, windows_safe_name, vault_username, vault_password, pvwa_ip,
-                                             key_pair_safe_name, pvwa_verification_key, aob_mode, debug_level)
+        parameters[ssm_store_item['Name']] = ssm_store_item['Value']
+    
+    if parameters['AOB_mode'] == 'POC':
+        parameters['AOB_PVWA_Verification_Key'] = ''
+
+    store_parameters_class = StoreParameters(
+        parameters.get("Unix_Safe_Name"),
+        parameters.get("Unix_Platform_Name"),
+        parameters.get("Windows_Safe_Name"),
+        parameters.get("Windows_Platform_Name"),
+        parameters.get("Vault_User"),
+        parameters.get("Vault_Pass"),
+        parameters.get("PVWA_IP"),
+        parameters.get("KeyPair_Safe"),
+        parameters.get("AOB_PVWA_Verification_Key"),
+        parameters.get("AOB_mode"),
+        parameters.get("AOB_Debug_Level")
+    )
     return store_parameters_class
 
 
@@ -276,10 +271,12 @@ class StoreParameters:
     aob_mode = ""
 
 
-    def __init__(self, unix_safe_name, windows_safe_name, username, password, ip, key_pair_safe, pvwa_verification_key, mode,
+    def __init__(self, unix_safe_name, unix_platform_name, windows_safe_name, windows_platform_name, username, password, ip, key_pair_safe, pvwa_verification_key, mode,
                  debug):
         self.unix_safe_name = unix_safe_name
+        self.unix_platform_name = unix_platform_name
         self.windows_safe_name = windows_safe_name
+        self.windows_platform_name = windows_platform_name
         self.vault_username = username
         self.vault_password = password
         self.pvwa_url = f"https://{ip}/PasswordVault"
